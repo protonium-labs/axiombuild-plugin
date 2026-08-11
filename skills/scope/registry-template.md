@@ -1,7 +1,7 @@
 # Scope Registry
 
 Format: **v1**
-Acronym: **<ACR>**
+Acronym: **`<ACR>`**
 Next quick feature: **Q001**
 
 <!--

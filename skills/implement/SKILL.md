@@ -157,14 +157,37 @@ The only action that touches `main`. Ask before merging and before pushing.
    The subject is the document's `title`, lowercased. **Transcribed, never composed.**
 4. Write the `CHANGELOG.md` line at the **top** of the list:
 
-   `- **<date>** · \`<ID>\` · <Title verbatim> · [\`<filename>\`](scope/done/<filename>)`
+   ```text
+   - **<date>** · `<ID>` · <Title verbatim> · [`<filename>`](scope/done/<filename>)
+   ```
 
    The title is copied from frontmatter exactly as written. Do not describe the feature — the description is the document being linked.
+
+   Then lint it (see *Markdown discipline*). This file is appended to on every completed feature and is the most-edited markdown in the repository — it is where formatting drift accumulates if nothing checks it.
 5. Archive: move the document from `scope/` to `scope/done/`, filename unchanged.
 6. Amend the squash commit to include the changelog line and the archived document, so the feature remains one commit.
 7. Reset `context/current-feature.md` to the idle state.
 8. Ask before deleting the branch, and before pushing `main`.
 9. Report: the commit, the changelog line, and the archive path.
+
+---
+
+## Markdown discipline
+
+Every markdown file you write or edit is lint-clean before you report it done — `CHANGELOG.md` and `context/current-feature.md` here, and any documentation a task explicitly asks for.
+
+```bash
+npx --yes markdownlint-cli2 --fix [--config <path>] <the file you just wrote>
+```
+
+Config resolution is the same three-step order `/verify` uses: the repository's own config if it has one (pass no `--config`, and never edit or replace it), else `$CLAUDE_PLUGIN_ROOT/skills/verify/markdownlint.json`, else `{ "default": true, "MD013": false }` written to a temp file outside the repository.
+
+Two things this rule is not:
+
+- **Not a licence to touch other markdown.** A README you were not asked to edit is out of scope like any other file. Linting it is scope drift, and `/verify` will flag the diff.
+- **Not applicable to the source document.** It is read-only. That holds for the linter exactly as it holds for you.
+
+If `npx` is unavailable, say so once and carry on.
 
 ---
 

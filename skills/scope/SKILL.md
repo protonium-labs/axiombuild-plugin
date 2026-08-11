@@ -72,7 +72,7 @@ Assess the gates **against the actual repository, not against the description**.
 
 1. If a gate trips: **refuse to create the document.** Name which gate and what specifically triggered it. Then hand the user a drafted description — goal, the constraint that tripped the gate, and what you would propose — ready to paste into AxiomCore's `/dev feature`. Stop there. Do not offer to proceed anyway.
 2. If no gate trips: draft the document from `quick-feature-template.md`. Decompose into numbered tasks with observable acceptance criteria. Fill `Out of Scope` with what a reasonable reader might assume is included but is not.
-3. **Show the draft and wait for approval.** Nothing is written to `scope/` before the user agrees.
+3. **Show the draft and wait for approval.** Nothing is written to `scope/` before the user agrees. Lint the draft before showing it (see *Markdown discipline*) — once it lands in `scope/` it is read-only, and a malformed one can only be fixed by redrafting the whole thing.
 4. On approval: read `scope/registry.md`, allocate the next `Q###`, write `scope/<acr>-q###-<slug>.md`, increment the counter. Numbers are monotonic and never reused.
 5. Offer to `load` it.
 
@@ -88,6 +88,7 @@ Pre-flight validation: **is this document implementable without guessing?** Dele
 
 The checks:
 
+0. **Structurally parseable** — balanced code fences, well-formed tables, one H1, tasks at `###`, delimited frontmatter. Runs first and stops the rest: everything below reads structure out of this document, and so does `load`. A malformed document yields a plausible wrong ledger rather than an error.
 1. **Frontmatter** — `id` and `title` present; `id` matches the `<ACR>-F###` or `<ACR>-Q###` shape.
 2. **ID is free** — not already in `CHANGELOG.md` and not already in `scope/done/`.
 3. **Tasks exist** — at least one `### T<n>`, each with at least one acceptance criterion.
@@ -142,6 +143,25 @@ worth capturing, while the reason is still obvious.
 1. Move the document from `scope/` to `scope/done/`. The filename does not change — `CHANGELOG.md` links to it.
 2. If the document is still loaded in the ledger, refuse unless the ledger's status is `idle`.
 3. Normally invoked by `/implement complete`. Called directly, it is for abandoning a feature — say so and confirm before moving.
+
+---
+
+## Markdown discipline
+
+Every markdown file you write or edit is lint-clean before you report it done. This skill owns four of them — `scope/README.md`, `scope/registry.md`, `context/coding-standards.md`, `context/current-feature.md` — plus each quick document at drafting time.
+
+```bash
+npx --yes markdownlint-cli2 --fix [--config <path>] <the file you just wrote>
+```
+
+Config resolution is the same three-step order `/verify` uses: the repository's own config if it has one (pass no `--config`, and never edit or replace it), else `$CLAUDE_PLUGIN_ROOT/skills/verify/markdownlint.json`, else `{ "default": true, "MD013": false }` written to a temp file outside the repository. Nothing is ever added to the user's project.
+
+Two exceptions, both for the same reason — a document in `scope/` is read-only:
+
+- **Never lint a document already in `scope/` or `scope/done/`**, with or without `--fix`. Not to tidy it, not to fix a table. `spec-checker` reports on their structure at `check`; nobody repairs them here.
+- A **quick draft** is linted *before* it is shown for approval, while it is still yours.
+
+If `npx` is unavailable, say so once and carry on. The rule is that the check is not skipped silently, not that work stops without a linter.
 
 ---
 
