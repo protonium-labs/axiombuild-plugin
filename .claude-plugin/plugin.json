@@ -1,7 +1,7 @@
 {
   "name": "axiombuild",
-  "description": "Implementation agent for coding projects. Reads feature documents produced by AxiomCore (or drafts small ones itself), implements them one task at a time, verifies against acceptance criteria, and records every feature in a structured changelog matched to its commit. Refuses to guess: ambiguity stops the work and produces a question. Run /scope init in a new project folder to begin.",
-  "version": "1.1.0",
+  "description": "Implementation agent for coding projects. Reads feature documents produced by AxiomCore (or drafts small ones itself), builds them task by task - gating each task against its acceptance criteria and committing it before the next begins -  and records every feature in a structured changelog matched to its commit. Refuses to guess: ambiguity stops the work and produces a question. Run /scope init in a new project folder to begin.",
+  "version": "1.2.0",
   "author": {
     "name": "Alexander Dybov",
     "email": "dybovalex@gmail.com"
