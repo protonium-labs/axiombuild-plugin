@@ -2,6 +2,18 @@
 
 All notable changes to the AxiomBuild plugin. Newest on top.
 
+## 1.2.0 — 2026-09-07
+
+Two changes: a feature run goes end to end without the user in it, and the arrival of a document from AxiomCore stops being something a human carries.
+
+- **`/implement start [all|N]` runs the tasks.** No argument runs all of them. `start 0` branches without implementing, which is the old behaviour when you want to read the tasks first. `next` alone still runs exactly one task; `next all` or `next N` resumes a stopped run. The budget lives in the ledger, so a resumed session knows what it was.
+- **Each task is gated before it counts.** `/verify T<n>` — `criteria-verifier` judging the diff in a separate context — then the project's test command. **Validation between tasks moved rather than disappeared**: the old rhythm stopped after every task so the user could look, which is a weaker check than a separate agent reading the criteria, and it cost a round trip each time.
+- **A commit lands after every successful task, before the next one starts.** One commit, one task, in order — that is how a finished run is read. Never batched, never deferred to the end.
+- **A run stops on a failing criterion, a failing test, or any of the four stop triggers**, and never starts the next task afterwards. The work stays on the branch, uncommitted: a failed task is usually mostly right, and discarding it costs more than leaving it. A run that finishes every task ends with `/verify all` and its matrix; `complete` stays manual, because it merges to `main`.
+- **One language rule for every stop and every question this skill asks.** The reader knows HTML, CSS, JavaScript and common frameworks and has never worked in IT: concrete technical words yes, jargon and in-house shorthand no, and no talking down either — vague is not the same as plain. Tracebacks and failing assertions are held and given only on request.
+- **`F###` documents now arrive on their own.** AxiomCore writes them into `scope/` once they pass its own pre-issue check, and rewrites the file when it re-issues a corrected version. `spec-checker`'s remedy text and `/scope`'s pointers no longer describe a human courier; a gap found here is one that check missed or that the transfer broke, and the report says which.
+- **Fixed:** the ledger template wrote `spec_version`, a pin AxiomCore retired — a loaded feature would have carried a field that no longer exists on any document. It now carries the document's own `version`, and the ledger gains `budget`.
+
 ## 1.1.0 — 2026-08-11
 
 Markdown quality, brought over from AxiomCore — adapted, because AxiomBuild is a guest in someone else's repository.

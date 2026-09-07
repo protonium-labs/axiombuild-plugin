@@ -2,9 +2,11 @@
 
 Implementation agent for coding projects. Planning happens elsewhere; this builds what was planned.
 
-AxiomBuild reads a feature document, implements it one task at a time, checks the result against
-the document's own acceptance criteria, and records the feature in a structured changelog matched
-to its commit. It does not decide *what* to build — it refuses to guess, and stops to ask instead.
+AxiomBuild reads a feature document and builds it task by task, gating each one against the
+document's own acceptance criteria before committing it and moving on, then records the feature in a
+structured changelog matched to its commit. A run goes end to end on its own and stops the moment
+something does not pass. It does not decide *what* to build — it refuses to guess, and stops to ask
+instead.
 
 Pairs with [AxiomCore](https://github.com/protonium-labs/axiomcore-plugin), which produces the
 feature documents. Neither requires the other: AxiomBuild can draft small features itself, and
@@ -29,12 +31,18 @@ Skills are namespaced by the plugin, so they are invoked as `/axiombuild:scope`,
 ## The loop
 
 ```text
-        AxiomCore  ──copy──┐
-                           ▼
+        AxiomCore ──writes──┐
+                            ▼
         /scope quick ──►  scope/  ──►  /scope check  ──►  /scope load
                                                                 │
                                                                 ▼
-                                        /implement start ──► next ──► next …
+                                            /implement start [all|N]
+                                                                │
+                                            ┌── task ─► verify ─► test ─► commit ──┐
+                                            │            │                         │
+                                            └────────────┼─────────── next task ◄──┘
+                                                         ▼
+                                                   anything fails → stop and ask
                                                                 │
                                                                 ▼
                                              /verify all ──► /implement complete
@@ -48,8 +56,9 @@ One squashed commit per feature on `main`. One changelog line per feature. The f
 
 ## Two on-ramps
 
-**From AxiomCore** — for anything that deserves planning. You copy the feature document into
-`scope/` by hand. The document is authoritative and read-only.
+**From AxiomCore** — for anything that deserves planning. AxiomCore writes the feature document into
+`scope/` itself, once it has passed its own pre-issue check, and rewrites it when it re-issues a
+corrected version. Nothing is copied by hand. The document is authoritative and read-only here.
 
 **From `/scope quick`** — for a change too small to justify a planning round. You describe it, the
 agent drafts a minimal document for your approval. Three gates send it back to AxiomCore instead:
@@ -69,7 +78,7 @@ proceed anyway, and it does not build a smaller version.
 | Skill | Actions |
 | :--- | :--- |
 | `/scope` | `init` · `quick` · `list` · `check` · `load` · `archive` · `standards` |
-| `/implement` | `start` · `next` · `status` · `explain` · `blocked` · `commit` · `complete` |
+| `/implement` | `start [all\|N]` · `next [T<n>\|all\|N]` · `status` · `explain` · `blocked` · `commit` · `complete` |
 | `/verify` | `all` · `T<n>` · `criteria` |
 
 ## Agents
@@ -102,8 +111,9 @@ style(SP-Q001): change card border colour
 ```
 
 Conventional type, feature ID as scope, subject transcribed from the document's `title`.
-Branch `feature/<ID>` or `quick/<ID>`. Checkpoints on the branch carry the task
-(`feat(SP-F012): T2 build the /favorites route`) and are squashed away at completion.
+Branch `feature/<ID>` or `quick/<ID>`. **One commit per task, written as soon as that task passes its
+criteria and the tests** (`feat(SP-F012): T2 build the /favorites route`) — that sequence is how a
+finished run is read. They are squashed away at completion.
 No attribution lines, ever.
 
 ### Changelog

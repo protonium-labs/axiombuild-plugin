@@ -80,7 +80,7 @@ Assess the gates **against the actual repository, not against the description**.
 
 1. Read every document directly in `scope/` (not `done/`). For each, show: ID, title, origin, task count, and whether `check` has passed this session.
 2. Read `context/current-feature.md` and show what is loaded, if anything.
-3. If `scope/` is empty and nothing is loaded, say so and point at `/scope quick` and the AxiomCore copy path.
+3. If `scope/` is empty and nothing is loaded, say so and point at `/scope quick`. AxiomCore writes an `F###` document into `scope/` itself once it passes its pre-issue check, so an empty inbox means nothing has been issued yet — not that a copy is waiting to be carried.
 
 ## If action is "check"
 
@@ -106,12 +106,12 @@ The checks:
 1. Read `context/current-feature.md`. If `status` is anything but `idle`, refuse: a feature is already active. Name it and point at `/implement complete` or `/implement blocked`.
 2. Run **check**. On any failure, refuse to load and report the gaps. Do not offer to load anyway.
 3. Parse the document into the ledger:
-   - Frontmatter → ledger frontmatter. **An absent `origin` field means `axiomcore`** — documents from AxiomCore do not carry one and must not be required to.
+   - Frontmatter → ledger frontmatter. **An absent `origin` field means `axiomcore`** — documents from AxiomCore do not carry one and must not be required to. Carry the document's own `version` across; there is no `spec_version` on either side, and a document pins no other document's version.
    - Each `### T<n>` → one ledger row, status `pending`, criteria counted.
    - Resolve **binding standing** per design section: Data & Error Flow and any public interface are always binding; every other section is binding unless it carries the "Proposed reference design" banner, in which case it is proposed.
    - Copy `Out of Scope` verbatim.
 4. Write the ledger, `status: loaded`. **Do not branch and do not touch the working tree** — that is `/implement start`.
-5. Report: N tasks, which sections are binding, what is out of scope. Then point at `/implement start`.
+5. Report: N tasks, which sections are binding, what is out of scope. Then point at `/implement start` — which branches **and runs the tasks**, all of them unless given a number.
 
 ## If action is "standards"
 
@@ -172,6 +172,7 @@ Report as two short lists: what changed on disk, and what needs the user's decis
 ## Notes
 
 - **A document in `scope/` is read-only.** This skill creates quick documents; it never edits any document, from either origin, after it is written. A change to an issued feature is a new document, never an edit to the old one.
+- **`F###` documents arrive on their own.** AxiomCore writes them into `scope/` after its own pre-issue check passes, and re-writes the file when it re-issues a corrected version. Nothing here fetches, and nothing here is copied by hand. A document appearing without warning is normal; a document changing under you means AxiomCore revised it, and the version in the frontmatter says which one you now hold.
 - **Never mint an `F###`.** That counter belongs to AxiomCore. Locally authored documents are always `Q###`.
 - `check` and `list` are read-only and safe to run at any time.
 - The three gates are not advisory. When one trips, the answer is a draft for AxiomCore, not a smaller version of the change.

@@ -16,10 +16,11 @@ feature: SP-F012
 title: Favorites page
 origin: axiomcore          # axiomcore | local  (absent in a document => axiomcore)
 type: new                  # new | change | quick
-spec_version: V003         # omitted for quick features
+version: V003              # the feature document's own version; no spec version is pinned (su-009)
 source: scope/sp-01-f012-favorites.md
 branch: feature/SP-F012
 status: in-progress        # idle | loaded | in-progress | blocked | verified
+budget: all                # all | <N> | 0 — tasks this run may take, set by /implement start
 started: 2026-08-04
 ---
 

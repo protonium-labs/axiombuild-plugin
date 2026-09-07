@@ -33,7 +33,7 @@ Output format:
 
 - **Verdict**: implementable / gaps found / unparseable.
 - **Gaps**: numbered, each with the check that failed, the exact location in the document, and what specifically is missing. Quote the offending line.
-- **Remedy**: for an `F###` document, this is `/dev revise` input for AxiomCore — phrase each gap as a question the planner can answer. For a `Q###` document, it is a redraft with `/scope quick`.
+- **Remedy**: for an `F###` document, each gap is phrased as a question AxiomCore can answer, and it is AxiomCore that answers it — that document is mastered there and is revised there. **It arrives here automatically**, written into `scope/` once it passes AxiomCore's own pre-issue check, so a gap you find is one that check missed or that the transfer broke; say which you think it is. The user does not carry it back by hand, but they do decide what happens next. For a `Q###` document, the fix is a redraft with `/scope quick`.
 
 Rules:
 

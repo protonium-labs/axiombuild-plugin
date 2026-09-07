@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Run the loaded feature, one task at a time. Actions - start (branch), next (execute exactly one task, then stop), status, explain, blocked (record a stop trigger and halt), commit (checkpoint on the branch), complete (squash-merge, changelog line, archive), overview. Never invents work beyond the loaded document.
+description: Run the loaded feature. Actions - start [all|N] (branch, then run tasks back to back, committing after each), next [all|N] (run one task, or resume a run), status, explain, blocked (record a stop trigger and halt), commit (checkpoint on the branch), complete (squash-merge, changelog line, archive), overview. Stops on a failing criterion, a failing test, or any stop trigger. Never invents work beyond the loaded document.
 ---
 
 # Task
@@ -25,6 +25,50 @@ These apply to **every** action in this skill, not to one section. When any of t
 | Repeated failure | The same problem survives two or three genuine attempts |
 
 **Blocked is a successful outcome.** A stopped feature with a precise question is worth more than a finished feature built on a guess.
+
+---
+
+## Stopping, and how you say so
+
+A run stops on any of these. The first three are failures; the last two are simply the end.
+
+| Stop | What it means |
+| :--- | :--- |
+| A criterion fails `/verify T<n>` | The task did not do what the document asked |
+| The test command fails | Something that used to work no longer does |
+| One of the four stop triggers fires | Go to **blocked**, which owns that path |
+| The budget is spent | Not a failure. Report and wait |
+| No pending task remains | Run `/verify all`, report the matrix, stop |
+
+**The work stays where it is.** A failed task is not reverted and not committed — it is usually
+mostly right, and throwing it away costs more than leaving it for the next instruction. Say plainly
+that it is uncommitted, so the state of the branch is never a surprise.
+
+**Never start the next task after a stop.** Not to be helpful, not because the next one looks
+unrelated.
+
+### The language a stop is reported in
+
+Applies to every stop, to `blocked`, and to any question this skill puts to the user.
+
+*Who you are writing for.* Someone who knows HTML, CSS, JavaScript and common frameworks — Django,
+Next.js — and has **never worked in IT**. Concrete technical words are fine and expected: a test, a
+function, a branch, a date range, a default value, a commit. What is not fine is jargon and in-house
+shorthand — abbreviations, criterion numbers as the subject, file paths standing in for an
+explanation, and any term that means something only inside this codebase. **Do not talk down
+either**: no analogies, no explaining what a test is. Vague is not the same as plain.
+
+Three or four lines, not a report:
+
+- Good: *"`T4` stopped. The test that checks the year range now fails — the slider's lowest year
+  comes back as text, not a number, and the comparison rejects it. I can convert it where the value
+  is read, or fix it in the slider itself. Which?"*
+- Bad: *"T4/C3 assertion failure: `TypeError` in `test_year_bounds`, expected `int` got `str`
+  (`views/timeseries.py:88`)."*
+- Also bad: *"Something went wrong with the years."*
+
+The technical detail — the traceback, the exact line, the failing assertion — is **held and given
+only if the user asks for it**. It is never volunteered and never attached to the question.
 
 ---
 
@@ -60,8 +104,8 @@ Describe this skill: its purpose and the actions table from "overview". Do not e
 
 | Argument | Action |
 | :--- | :--- |
-| `start` | Create the feature branch and open the ledger for work |
-| `next [T<n>]` | Execute exactly one task, then stop for validation |
+| `start [all\|N]` | Create the feature branch, then run the tasks. No argument runs all of them |
+| `next [T<n>\|all\|N]` | Run one task, a named task, or resume a run of N (or all) remaining |
 | `status` | Ledger state: tasks, progress, branch, anything blocked |
 | `explain` | What changed on this branch, file by file, and how it connects |
 | `blocked <question>` | Record a stop trigger, halt, and produce a question for AxiomCore |
@@ -79,11 +123,19 @@ If the action was unknown, say so first, then show the table.
 2. **Require a clean working tree.** Uncommitted changes plus a new branch is exactly the mess this workflow exists to prevent. Report what is dirty and stop.
 3. Create and check out the branch: `feature/<ID>` when `origin` is `axiomcore`, `quick/<ID>` when it is `local`.
 4. Set `status: in-progress`, record `branch` and `started`.
-5. Report the task list and point at `/implement next`. Do not start implementing.
+5. **Read the run budget from the argument** and record it in the ledger as `budget`:
+   - no argument, or `all` — every pending task;
+   - a number `N` — the next `N` pending tasks;
+   - `0` — branch only, implement nothing. This is the old behaviour, kept for when you want to read
+     the tasks before any code is written.
+6. Report the task list and the budget, then **run the loop** (below). Do not ask first: the budget
+   is the permission.
 
 ## If action is "next"
 
-Executes **exactly one task**, then stops. This is the two-phase rule at task granularity: one step, shown, validated, then the next.
+`next` alone executes **exactly one task** and stops — the manual mode, for when you want to look
+at the work before more is written. `next all` or `next N` sets a new budget and resumes the loop,
+which is how a run that stopped is picked back up.
 
 1. Read the ledger. Take the `T<n>` given as argument, or the first task with status `pending`. If every task is `done`, say so and point at `/verify all`.
 2. Read the **source document** for that task's full text and criteria — the ledger row is a summary, not the spec.
@@ -95,7 +147,20 @@ Executes **exactly one task**, then stops. This is the two-phase rule at task gr
    - Watch the four stop triggers throughout. Any one fires → **blocked**.
 5. Self-check the task's acceptance criteria and record the count (`2/3`). This is a smoke test so obviously incomplete work is not handed back — it is **not** verification. `/verify` owns that, in a separate context.
 6. If every criterion passes, mark `done`. If not, report which failed and stay `in-progress`.
-7. **Stop.** Show the work for this task only — no preview of the next one, no summary of the whole feature.
+7. **Gate the task before it counts as finished**, in this order. Any failure stops the run (see
+   *Stopping*):
+   - **`/verify T<n>`** — the criteria matrix for this task, judged by `criteria-verifier` in a
+     separate context. The context that wrote the code does not decide whether it met the spec.
+   - **The project's test command** from `context/coding-standards.md`. A regression introduced at
+     `T3` and found at `T13` costs far more than the seconds this takes. If no test command is
+     defined, say so once per run and carry on.
+8. **Commit.** `<type>(<ID>): T<n> <what was done>`, exactly as the `commit` action defines it.
+   **This happens after every successful task, before the next one starts** — the commit boundary is
+   how the work is read afterwards, so it is never batched and never deferred to the end of a run.
+9. **Decrement the budget and continue** to the next pending task at step 1. When the budget is
+   spent, or no pending task remains, stop and report.
+10. **At the end of a run that finished every task**, run `/verify all` and report the matrix.
+    `complete` is **not** run — it merges to `main` and keeps its own confirmation.
 
 ## If action is "status"
 
@@ -116,7 +181,7 @@ Read-only. Useful before `/verify` or when picking a feature back up after a bre
 3. Produce a question block for the user to carry back:
 
    ```text
-   Feature: <ID> (spec <version>)
+   Feature: <ID> v<document version>
    Task:    T<n>
    Trigger: <ambiguity | binding conflict | beyond tasks | repeated failure>
 
@@ -125,7 +190,13 @@ Read-only. Useful before `/verify` or when picking a feature back up after a bre
    Options:   <if there are obvious candidates, list them; otherwise omit>
    ```
 
-   For an `F###` feature this is `/dev revise` input for AxiomCore. For a `Q###` feature, the fix is a redraft with `/scope quick`.
+   The version is the feature document's own, from its frontmatter — no spec version is pinned
+   anywhere, on either side.
+
+   Say it to the user in the language *Stopping* defines, and keep the block above for the record
+   rather than as the thing you show them. For an `F###` feature the answer is authored in AxiomCore
+   and the corrected document is re-issued into `scope/` automatically; for a `Q###` feature the fix
+   is a redraft with `/scope quick`.
 4. **Stop implementing.** Do not work around it, and do not move to the next task while a blocker stands.
 
 ## If action is "commit"
@@ -201,4 +272,5 @@ Report as two short lists: what changed on disk, and what needs the user's decis
 - **Never invent scope.** Anything not in a `T<n>` is not in this feature, however obvious or cheap it looks.
 - Do not refactor unrelated code, and do not add improvements nobody asked for.
 - Do not add manual memoization where a compiler handles it, and follow whatever equivalent rules `context/coding-standards.md` sets for this stack.
-- One task per `next`. The user validates between tasks; that gap is the point, not friction to optimise away.
+- **Validation between tasks moved; it was not removed.** `next` used to stop after every task so the user could look. A run now gates each task with `/verify T<n>` — `criteria-verifier`, in a separate context, judging the diff against the criteria — and with the project's tests, then commits. That is a stronger check than a glance, and it costs the user nothing. `next` with no argument still runs a single task for when you want to look anyway.
+- **A commit per successful task is not optional.** It is how the run is read afterwards: one commit, one task, in order. Never batch them, never defer them to the end of a run.
