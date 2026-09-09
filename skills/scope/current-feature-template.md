@@ -5,10 +5,13 @@ status: idle
 
 # Current Feature
 
-No feature loaded. Run `/scope list` to see what is waiting, then `/scope load <ID>`.
+No feature open. Run `/scope list` to see what is waiting, then `/scope start <ID>`.
 
 <!--
-ACTIVE SHAPE — what /scope load writes. Reset to the idle state above by /implement complete.
+ACTIVE SHAPE — what /scope start writes. Reset to the idle state above by /scope done.
+
+This file records WHICH feature is open. It does not hold the task plan: that is
+superpowers' business and lives in docs/superpowers/plans/, beside the code.
 
 ---
 format: v1
@@ -16,49 +19,26 @@ feature: SP-F012
 title: Favorites page
 origin: axiomcore          # axiomcore | local  (absent in a document => axiomcore)
 type: new                  # new | change | quick
-version: V003              # the feature document's own version; no spec version is pinned (su-009)
+version: V003              # the feature document's own version; no other document's version is pinned
 source: scope/sp-01-f012-favorites.md
 branch: feature/SP-F012
-status: in-progress        # idle | loaded | in-progress | blocked | verified
-budget: all                # all | <N> | 0 — tasks this run may take, set by /implement start
-started: 2026-08-04
+status: open               # idle | open | blocked
+started: 2026-09-09
 ---
 
 # Current Feature — SP-F012 Favorites page
 
-## Tasks
-
-| # | Task | Status | Criteria |
-| :- | :--- | :--- | :--- |
-| T1 | Add owner-scoped getFavorites query | done | 3/3 |
-| T2 | Build the /favorites route | in-progress | 0/2 |
-| T3 | Star button in the top bar | pending | 0/1 |
-
-Task status: pending | in-progress | done | blocked
-
-## Binding
-
-Which design sections of the source document are binding, resolved at load time.
-
-| Section | Standing |
-| :--- | :--- |
-| Data & Error Flow | binding (always) |
-| Interfaces — public | binding (always) |
-| Interfaces — internal | binding |
-| Affected Structure | proposed |
-| Logic | not present |
-
-## Out of Scope
-
-Copied verbatim from the source document. These are prohibitions, not hints.
-
-- Collection favorites — covered by SP-F013
+Requirements: `scope/sp-01-f012-favorites.md` (read-only).
+Task plan: `docs/superpowers/plans/2026-09-09-favorites-page.md`.
 
 ## Blocked
 
-Questions raised during implementation. Empty when clear. Each entry names the trigger that
-fired, so it can be taken back to AxiomCore as /dev revise input.
+Questions raised while building. Empty when clear.
 
-- **T2 · binding conflict** — the Interfaces section specifies `getFavorites(userId)`, but the
-  existing query layer takes a session object. Which wins?
+A question here is taken to AxiomCore as `/dev revise` input — it is never resolved by editing
+the source document. The answer comes back as a bumped version of that document, re-issued into
+scope/. An implementing agent must not be able to move the target it is measured against.
+
+- **2026-09-09** — The requirements say favorites are per-user, but the existing session carries
+  no user id on the public route. Which is intended?
 -->

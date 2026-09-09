@@ -2,6 +2,25 @@
 
 All notable changes to the AxiomBuild plugin. Newest on top.
 
+## 2.0.0 — 2026-09-09
+
+**Breaking.** AxiomBuild stops implementing. It keeps the books, and `superpowers` does the building.
+
+The evidence, measured on a real project ten features in: **6,282 lines** of feature document produced **5,821 lines** of shipped code, and those ten documents carried **28 versions** between them — eighteen rewrites. The cause was structural, not sloppiness. A feature document written by a planner that has never run the code was asserting how the code should be arranged: file trees, task breakdowns, per-task acceptance criteria, interface signatures. Those assertions were wrong often, and each wrong one became a clarification, a version bump, a re-check and a re-issue. The document now states requirements; the task plan is written where the code is readable and runnable.
+
+- **`/implement` and `/verify` are gone.** `superpowers:writing-plans` decomposes the feature with the repository in context; `executing-plans` runs it TDD-first, committing per step; `verification-before-completion` and `requesting-code-review` gate it; `finishing-a-development-branch` merges it. Entry is at `writing-plans`, **never** `brainstorming` — the product thinking already happened in AxiomCore, and its hard gate would repeat it.
+- **The three agents are gone** — `spec-checker`, `criteria-verifier`, `code-scanner`. They existed to make thousand-line documents safe. A forty-line requirements document is read by a person in under a minute, and code review now reads the diff instead of the document.
+- **`/scope check` and `/scope load` are gone.** `check` duplicated a gate AxiomCore already ran; `load` parsed a task ledger that no longer exists.
+- **`/scope start <ID>`** replaces `load`: records the feature in `context/current-feature.md` and cuts `feature/<ID>`. It reads the frontmatter and nothing else, and it plans nothing.
+- **`/scope done <ID>`** replaces `archive` and `/implement complete`: confirms the work is merged, moves the document to `scope/done/`, writes the changelog line, resets the current-feature record. It does not merge, test or verify — it records what already happened.
+- **`/scope quick` drafts requirements, not tasks.** The three gates are unchanged and still assessed against the code rather than the description.
+- **`/scope standards` is unchanged** and now matters more: with no bundled verifier, the stack profile is where the test and build commands live.
+- **`context/current-feature.md` loses the task ledger and the binding table.** It records which feature is open, not how it is being built. A `Blocked` section remains, because a question is worth recording — and is still answered in AxiomCore, never by editing the read-only document.
+- **Fixed:** both bundled markdownlint configs missed the `MD025` `front_matter_title` exemption, so any document carrying frontmatter plus an H1 — which every AxiomCore feature document has since its own `su-010` — would fail the lint it was handed to. Latent until now only because documents in `scope/` are never linted.
+- **`superpowers` is a real dependency.** `/scope init` checks for it and says so if it is missing, but never installs it unasked.
+
+**Upgrading.** Finish any in-flight feature on 1.x first. Your `scope/`, `CHANGELOG.md` and `context/` are untouched by the update; only `context/current-feature.md` changes shape, and only once `/scope start` next writes it.
+
 ## 1.2.0 — 2026-09-07
 
 Two changes: a feature run goes end to end without the user in it, and the arrival of a document from AxiomCore stops being something a human carries.

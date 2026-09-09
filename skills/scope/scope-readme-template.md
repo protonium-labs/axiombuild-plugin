@@ -17,6 +17,6 @@ code, the agent stops and asks rather than guessing.
 
 ## Lifecycle
 
-`scope/` → `/scope check` → `/scope load` → `/implement` → `scope/done/`
+`scope/` → `/scope start` → `superpowers` (plan → build → verify → merge) → `/scope done` → `scope/done/`
 
 Completed documents move to `scope/done/` and are linked from `CHANGELOG.md`.

@@ -3,7 +3,7 @@
 Format: **v1**
 
 <!--
-Latest on top. One line per feature, written by /implement complete.
+Latest on top. One line per feature, written by /scope done.
 
 The line REFERENCES the feature document — it never describes the feature. The title is
 transcribed verbatim from the document's `title` frontmatter field; the agent does not compose

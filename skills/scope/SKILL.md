@@ -1,6 +1,6 @@
 ---
 name: scope
-description: Own the scope/ inbox - feature documents waiting to be implemented. Actions - init (scaffold a project), quick (draft a small feature locally), list, check (pre-flight validation), load (parse into the task ledger), archive, overview. Documents from AxiomCore are read-only and this skill never mints an F### number.
+description: Own the scope/ inbox and keep the books - which feature document is current, which are finished. Actions - init (scaffold a project), quick (draft a small feature locally), list, start (open a feature and cut its branch), done (archive it and write the changelog line), standards, overview. Documents from AxiomCore are read-only and this skill never mints an F### number. It does not plan, implement or verify - superpowers does that.
 ---
 
 # Task
@@ -13,6 +13,26 @@ If the requested action is ambiguous or contradictory, do NOT guess: flag it and
 
 ---
 
+## What this skill is, and is not
+
+It keeps the books. Which feature is open, which are finished, what the project's stack rules are.
+
+It does **not** decompose a feature into tasks, write code, or verify anything. That is `superpowers`:
+
+```text
+scope/<doc>.md  →  /scope start <ID>
+                →  superpowers:writing-plans        (the tasks, with the repo readable)
+                →  superpowers:executing-plans      (TDD, commit per step)
+                →  superpowers:verification-before-completion
+                →  superpowers:requesting-code-review
+                →  superpowers:finishing-a-development-branch
+                →  /scope done <ID>
+```
+
+Entry is at `writing-plans`, **not** `brainstorming` — the product thinking was already done in AxiomCore, and brainstorming's hard gate would repeat it.
+
+---
+
 ## If action is empty
 
 Describe this skill: its purpose and the actions table from "overview". Do not execute anything.
@@ -21,12 +41,11 @@ Describe this skill: its purpose and the actions table from "overview". Do not e
 
 | Argument | Action |
 | :--- | :--- |
-| `init` | Scaffold this project: `scope/`, `CHANGELOG.md`, the task ledger, the stack profile |
+| `init` | Scaffold this project: `scope/`, `CHANGELOG.md`, the current-feature record, the stack profile |
 | `quick <description>` | Draft a small feature document locally, subject to the three gates |
-| `list` | What is waiting in `scope/`, and what is currently loaded |
-| `check <ID>` | Pre-flight: is this document implementable without guessing? Reports, never repairs |
-| `load <ID>` | Parse a document into the task ledger. Runs `check` first |
-| `archive <ID>` | Move a document to `scope/done/`. Normally called by `/implement complete` |
+| `list` | What is waiting in `scope/`, and what is currently open |
+| `start <ID>` | Open a feature: record it as current and cut its branch |
+| `done <ID>` | Close it: move the document to `scope/done/` and write the changelog line |
 | `standards [show \| add <rule>]` | Read or extend the project's stack profile |
 | `overview` | This table |
 
@@ -39,11 +58,12 @@ If the action was unknown, say so first, then show the table.
 Scaffolds the project. **Non-destructive and idempotent**: anything that already exists is read, never overwritten. Running it twice is safe; running it in a project that predates this plugin adopts what is already there.
 
 1. **Survey first.** List which target files already exist. Report them as "found" and leave their contents alone.
-2. **Detect the stack.** Read `package.json` (or the equivalent manifest) for the framework, the test command, and the build command. Do not ask about anything already discoverable.
+2. **Detect the stack.** Read `package.json`, `pyproject.toml` or the equivalent manifest for the framework, the test command, and the build command. Do not ask about anything already discoverable.
 3. **Ask for the project acronym** — two or three uppercase letters, fixed for the project's life. Warn the user to check it against their AxiomCore project acronyms: the `F###` and `Q###` namespaces share this prefix, so a clash makes IDs ambiguous across the two systems.
 4. **Interview for the stack profile** — language and version, test command, build command, lint command, framework conventions, anything the agent must never do (e.g. "never `prisma db push`"). Offer to skip; a skipped interview leaves a stub with the detected values only.
-5. **Verify git.** If the folder is not a git repository, say so plainly — `/implement` branches and squash-merges, and will not work without it. Do not run `git init` unasked.
-6. **Create what is missing**, from the templates in this skill folder:
+5. **Verify git.** If the folder is not a git repository, say so plainly — `start` cuts a branch and `superpowers:finishing-a-development-branch` merges one, and neither works without it. Do not run `git init` unasked.
+6. **Check for superpowers.** If the `superpowers` plugin is not available in this project, say so: without it there is nothing here that plans or builds. Point at `/plugin install superpowers@claude-plugins-official`. Do not install it unasked.
+7. **Create what is missing**, from the templates in this skill folder:
 
    | Path | Template |
    | :--- | :--- |
@@ -54,7 +74,7 @@ Scaffolds the project. **Non-destructive and idempotent**: anything that already
    | `context/current-feature.md` | `current-feature-template.md`, idle state |
    | `context/coding-standards.md` | interview answers, or a stub |
 
-7. **Report** two short lists: created, and found-and-left-alone.
+8. **Report** two short lists: created, and found-and-left-alone.
 
 ## If action is "quick"
 
@@ -71,47 +91,41 @@ Drafts a small feature document locally, so a minor change does not need a plann
 Assess the gates **against the actual repository, not against the description**. Read the relevant code first. "Change the card border colour" is a style change until you open the file and find the colour comes from a theme token that does not exist yet.
 
 1. If a gate trips: **refuse to create the document.** Name which gate and what specifically triggered it. Then hand the user a drafted description — goal, the constraint that tripped the gate, and what you would propose — ready to paste into AxiomCore's `/dev feature`. Stop there. Do not offer to proceed anyway.
-2. If no gate trips: draft the document from `quick-feature-template.md`. Decompose into numbered tasks with observable acceptance criteria. Fill `Out of Scope` with what a reasonable reader might assume is included but is not.
+2. If no gate trips: draft the document from `quick-feature-template.md`. **Requirements, not tasks** — what the finished thing does, from the outside. The task breakdown is `superpowers:writing-plans`' job, after `start`. Fill `Out of Scope` with what a reasonable reader might assume is included but is not.
 3. **Show the draft and wait for approval.** Nothing is written to `scope/` before the user agrees. Lint the draft before showing it (see *Markdown discipline*) — once it lands in `scope/` it is read-only, and a malformed one can only be fixed by redrafting the whole thing.
 4. On approval: read `scope/registry.md`, allocate the next `Q###`, write `scope/<acr>-q###-<slug>.md`, increment the counter. Numbers are monotonic and never reused.
-5. Offer to `load` it.
+5. Offer to `start` it.
 
 ## If action is "list"
 
-1. Read every document directly in `scope/` (not `done/`). For each, show: ID, title, origin, task count, and whether `check` has passed this session.
-2. Read `context/current-feature.md` and show what is loaded, if anything.
-3. If `scope/` is empty and nothing is loaded, say so and point at `/scope quick`. AxiomCore writes an `F###` document into `scope/` itself once it passes its pre-issue check, so an empty inbox means nothing has been issued yet — not that a copy is waiting to be carried.
+1. Read every document directly in `scope/` (not `done/`). For each, show: ID, title, origin, and version where the frontmatter carries one.
+2. Read `context/current-feature.md` and show what is open, if anything.
+3. If `scope/` is empty and nothing is open, say so and point at `/scope quick`. AxiomCore writes an `F###` document into `scope/` itself, so an empty inbox means nothing has been issued yet — not that a copy is waiting to be carried.
 
-## If action is "check"
+## If action is "start"
 
-Pre-flight validation: **is this document implementable without guessing?** Delegate to the **spec-checker** subagent, which owns the check list. Relay its report unchanged.
+Opens a feature. This is bookkeeping plus one git command — it does not read the document's content beyond the frontmatter, and it plans nothing.
 
-The checks:
+1. Read `context/current-feature.md`. If `status` is anything but `idle`, refuse: a feature is already open. Name it and point at `/scope done`.
+2. Resolve `<ID>` to a document directly in `scope/`. If it is not there, say which documents are, and stop.
+3. Confirm the ID is not already spent — not in `CHANGELOG.md`, not in `scope/done/`. A repeat means the feature was already delivered; ask before going further.
+4. Cut the branch `feature/<ID>` from the default branch, working tree clean. If it is not clean, stop and say what is uncommitted.
+5. Write `context/current-feature.md` from `current-feature-template.md`: `feature`, `title`, `origin`, `type`, `version`, `source`, `branch`, `status: open`, `started`. Transcribe from the document's frontmatter — **an absent `origin` means `axiomcore`**, and the document's own `version` is carried across as it stands. No document pins another document's version.
+6. Report the ID, the branch, and point at `superpowers:writing-plans` with the document path. Do not plan the work yourself.
 
-0. **Structurally parseable** — balanced code fences, well-formed tables, one H1, tasks at `###`, delimited frontmatter. Runs first and stops the rest: everything below reads structure out of this document, and so does `load`. A malformed document yields a plausible wrong ledger rather than an error.
-1. **Frontmatter** — `id` and `title` present; `id` matches the `<ACR>-F###` or `<ACR>-Q###` shape.
-2. **ID is free** — not already in `CHANGELOG.md` and not already in `scope/done/`.
-3. **Tasks exist** — at least one `### T<n>`, each with at least one acceptance criterion.
-4. **No placeholders** — no `TBD`, no `TODO`, no "etc.", no "and similar", no "add error handling", no "as needed". A placeholder is an instruction to guess.
-5. **Criteria are observable** — checkable without judgement. "Renders without a console error" passes; "looks good" and "works well" do not.
-6. **Paths resolve** — any file path the document states as existing, exists.
-7. **Binding sections match reality** — where the document names an interface, signature, or data shape that the code already defines differently, that is a conflict, not a detail.
-8. **Out of Scope present.**
-9. **Format version readable.**
+## If action is "done"
 
-**This action reports and stops there.** It never repairs a document. A failing AxiomCore document is `/dev revise` input for the user to carry back; a failing quick document is redrafted with `/scope quick`.
+Closes a feature. Run it **after** `superpowers:finishing-a-development-branch` has merged the work — this action records what happened, it does not merge, test, or verify.
 
-## If action is "load"
+1. Read `context/current-feature.md`. If nothing is open, or the open feature is not `<ID>`, say so and stop.
+2. Confirm the work is actually merged: the branch's commits are on the default branch and the working tree is clean. If not, say what is outstanding and stop — the books are not written before the work lands.
+3. Move `scope/<file>` to `scope/done/<file>`. The filename does not change: `CHANGELOG.md` links to it.
+4. Prepend the changelog line, format per `changelog-template.md`. The title is **transcribed verbatim** from the document's `title` frontmatter. Do not compose prose here — the description lives in the archived document.
+5. Reset `context/current-feature.md` to its idle state.
+6. Commit the bookkeeping: the moved document, `CHANGELOG.md`, `context/current-feature.md`. Message `chore(<ID>): archive and record`.
+7. Report what moved and what the changelog line says.
 
-1. Read `context/current-feature.md`. If `status` is anything but `idle`, refuse: a feature is already active. Name it and point at `/implement complete` or `/implement blocked`.
-2. Run **check**. On any failure, refuse to load and report the gaps. Do not offer to load anyway.
-3. Parse the document into the ledger:
-   - Frontmatter → ledger frontmatter. **An absent `origin` field means `axiomcore`** — documents from AxiomCore do not carry one and must not be required to. Carry the document's own `version` across; there is no `spec_version` on either side, and a document pins no other document's version.
-   - Each `### T<n>` → one ledger row, status `pending`, criteria counted.
-   - Resolve **binding standing** per design section: Data & Error Flow and any public interface are always binding; every other section is binding unless it carries the "Proposed reference design" banner, in which case it is proposed.
-   - Copy `Out of Scope` verbatim.
-4. Write the ledger, `status: loaded`. **Do not branch and do not touch the working tree** — that is `/implement start`.
-5. Report: N tasks, which sections are binding, what is out of scope. Then point at `/implement start` — which branches **and runs the tasks**, all of them unless given a number.
+**Abandoning a feature** rather than finishing it: say so explicitly, confirm with the user, move the document to `scope/done/` without a changelog line, and note in the report that no changelog entry was written.
 
 ## If action is "standards"
 
@@ -119,9 +133,9 @@ Reads and extends `context/coding-standards.md` — the project's stack profile.
 creates it; this keeps it current, so a correction is given once instead of every few weeks.
 
 **`show`** (or no argument) — print the profile. Name any section still holding placeholder values,
-and say plainly what each unfilled section costs: no `Commands` means `/verify` cannot run the
-tests or build; no `Never` list means the agent and `code-scanner` both work from general practice
-rather than this project's rules.
+and say plainly what each unfilled section costs: no `Commands` means the test and build commands
+are rediscovered every session; no `Never` list means the agent works from general practice rather
+than this project's rules.
 
 **`add <rule>`** — record a new entry.
 
@@ -138,12 +152,6 @@ rather than this project's rules.
 Most entries arrive as corrections during implementation — "no, not like that". That is the moment
 worth capturing, while the reason is still obvious.
 
-## If action is "archive"
-
-1. Move the document from `scope/` to `scope/done/`. The filename does not change — `CHANGELOG.md` links to it.
-2. If the document is still loaded in the ledger, refuse unless the ledger's status is `idle`.
-3. Normally invoked by `/implement complete`. Called directly, it is for abandoning a feature — say so and confirm before moving.
-
 ---
 
 ## Markdown discipline
@@ -154,11 +162,11 @@ Every markdown file you write or edit is lint-clean before you report it done. T
 npx --yes markdownlint-cli2 --fix [--config <path>] <the file you just wrote>
 ```
 
-Config resolution is the same three-step order `/verify` uses: the repository's own config if it has one (pass no `--config`, and never edit or replace it), else `$CLAUDE_PLUGIN_ROOT/skills/verify/markdownlint.json`, else `{ "default": true, "MD013": false }` written to a temp file outside the repository. Nothing is ever added to the user's project.
+Config resolution, in order: the repository's own config if it has one (pass no `--config`, and never edit or replace it), else `$CLAUDE_PLUGIN_ROOT/skills/scope/markdownlint.json`, else `{ "default": true, "MD013": false }` written to a temp file outside the repository. Nothing is ever added to the user's project.
 
 Two exceptions, both for the same reason — a document in `scope/` is read-only:
 
-- **Never lint a document already in `scope/` or `scope/done/`**, with or without `--fix`. Not to tidy it, not to fix a table. `spec-checker` reports on their structure at `check`; nobody repairs them here.
+- **Never lint a document already in `scope/` or `scope/done/`**, with or without `--fix`. Not to tidy it, not to fix a table.
 - A **quick draft** is linted *before* it is shown for approval, while it is still yours.
 
 If `npx` is unavailable, say so once and carry on. The rule is that the check is not skipped silently, not that work stops without a linter.
@@ -172,7 +180,9 @@ Report as two short lists: what changed on disk, and what needs the user's decis
 ## Notes
 
 - **A document in `scope/` is read-only.** This skill creates quick documents; it never edits any document, from either origin, after it is written. A change to an issued feature is a new document, never an edit to the old one.
-- **`F###` documents arrive on their own.** AxiomCore writes them into `scope/` after its own pre-issue check passes, and re-writes the file when it re-issues a corrected version. Nothing here fetches, and nothing here is copied by hand. A document appearing without warning is normal; a document changing under you means AxiomCore revised it, and the version in the frontmatter says which one you now hold.
+- **An issued feature that cannot be built is a question, not an edit.** Stop and ask the user. The answer is authored in AxiomCore, the version bumped, and the corrected copy re-issued into `scope/`. An implementing agent must never be able to move the target it is measured against.
+- **`F###` documents arrive on their own.** AxiomCore writes them into `scope/`, and re-writes the file when it re-issues a corrected version. Nothing here fetches, and nothing here is copied by hand. A document appearing without warning is normal; a document changing under you means AxiomCore revised it, and the version in the frontmatter says which one you now hold.
 - **Never mint an `F###`.** That counter belongs to AxiomCore. Locally authored documents are always `Q###`.
-- `check` and `list` are read-only and safe to run at any time.
+- **A feature document states requirements, not tasks.** If you want a task list before `writing-plans` has run, you are doing that skill's job.
+- `list` and `standards show` are read-only and safe to run at any time.
 - The three gates are not advisory. When one trips, the answer is a draft for AxiomCore, not a smaller version of the change.

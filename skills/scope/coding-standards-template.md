@@ -7,9 +7,9 @@ The project's stack profile. This is the one file that makes the agent portable:
 agents carry no stack knowledge, they read it from here.
 
 Who reads what:
-  /implement next   — Conventions, Patterns, Never (before writing any code)
-  /verify all       — Commands
-  code-scanner      — Stack, Patterns, Never (a finding must not contradict them)
+  superpowers:writing-plans     — Conventions, Patterns, Never (before planning any task)
+  superpowers:executing-plans   — Commands, Testing (the TDD cycle runs them)
+  superpowers:requesting-code-review — Stack, Patterns, Never (a finding must not contradict them)
 
 Written by /scope init from a short interview plus whatever it can detect from the manifest.
 Grows over time: every "no, not like that" is a line that belongs here, so it does not have to
@@ -18,7 +18,7 @@ be said twice.
 
 ## Commands
 
-<!-- Machine-consumed by /verify. Exact commands, as typed. -->
+<!-- Machine-consumed by the TDD cycle. Exact commands, as typed. -->
 
 | Purpose | Command |
 | :--- | :--- |
@@ -64,7 +64,7 @@ The highest-value section. Explicit prohibitions, each with its reason — the r
 the agent judge an edge case instead of following the rule off a cliff.
 
 Every one of these usually starts life as a correction. Add to it rather than repeating yourself.
-code-scanner also reads this list and will not recommend against anything on it.
+Code review reads this list too, and will not recommend against anything on it.
 -->
 
 - **Never `<create tailwind.config.js>`** — `<v4 is CSS-first; theme config belongs in @theme in globals.css>`
