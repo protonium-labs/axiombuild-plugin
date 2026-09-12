@@ -21,7 +21,7 @@ It does **not** decompose a feature into tasks, write code, or verify anything. 
 
 ```text
 scope/<doc>.md  →  /scope start <ID>
-                →  superpowers:writing-plans        (the tasks, with the repo readable)
+                →  superpowers:writing-plans        (the tasks, with the repo readable; reads docs/mockups/ too)
                 →  superpowers:executing-plans      (TDD, commit per step)
                 →  superpowers:verification-before-completion
                 →  superpowers:requesting-code-review
@@ -30,6 +30,8 @@ scope/<doc>.md  →  /scope start <ID>
 ```
 
 Entry is at `writing-plans`, **not** `brainstorming` — the product thinking was already done in AxiomCore, and brainstorming's hard gate would repeat it.
+
+**A UI feature arrives with its mockups** (2.1.0). AxiomCore copies each screen the feature touches into `docs/mockups/` as self-contained HTML, and the document names them in its `mockups:` frontmatter. The document owns behaviour, the mockup owns where everything sits on the screen, and both are read-only here. Library documentation is checked via context7, never recalled from memory. There is no automated comparison against the mockup — the owner checks the running screen.
 
 ---
 
@@ -109,9 +111,10 @@ Opens a feature. This is bookkeeping plus one git command — it does not read t
 1. Read `context/current-feature.md`. If `status` is anything but `idle`, refuse: a feature is already open. Name it and point at `/scope done`.
 2. Resolve `<ID>` to a document directly in `scope/`. If it is not there, say which documents are, and stop.
 3. Confirm the ID is not already spent — not in `CHANGELOG.md`, not in `scope/done/`. A repeat means the feature was already delivered; ask before going further.
-4. Cut the branch `feature/<ID>` from the default branch, working tree clean. If it is not clean, stop and say what is uncommitted.
-5. Write `context/current-feature.md` from `current-feature-template.md`: `feature`, `title`, `origin`, `type`, `version`, `source`, `branch`, `status: open`, `started`. Transcribe from the document's frontmatter — **an absent `origin` means `axiomcore`**, and the document's own `version` is carried across as it stands. No document pins another document's version.
-6. Report the ID, the branch, and point at `superpowers:writing-plans` with the document path. Do not plan the work yourself.
+4. **Check the mockups.** Read `mockups:` from the frontmatter. Every file it names must exist in `docs/mockups/`. If one is missing, name it and stop — no branch is cut, because building a screen without its mockup is exactly the gap mockups exist to close. An absent or empty `mockups:` means the feature has no screen to draw and passes.
+5. Cut the branch `feature/<ID>` from the default branch, working tree clean. If it is not clean, stop and say what is uncommitted.
+6. Write `context/current-feature.md` from `current-feature-template.md`: `feature`, `title`, `origin`, `type`, `version`, `source`, `mockups`, `branch`, `status: open`, `started`. Transcribe from the document's frontmatter — **an absent `origin` means `axiomcore`**, and the document's own `version` is carried across as it stands. No document pins another document's version.
+7. Report the ID, the branch, and point at `superpowers:writing-plans` with the document path and the mockup paths. Do not plan the work yourself.
 
 ## If action is "done"
 
@@ -179,6 +182,7 @@ Report as two short lists: what changed on disk, and what needs the user's decis
 
 ## Notes
 
+- **A mockup in `docs/mockups/` is read-only**, like the document that names it. A screen that cannot be built as drawn is a question for AxiomCore, which corrects the mockup and re-issues it.
 - **A document in `scope/` is read-only.** This skill creates quick documents; it never edits any document, from either origin, after it is written. A change to an issued feature is a new document, never an edit to the old one.
 - **An issued feature that cannot be built is a question, not an edit.** Stop and ask the user. The answer is authored in AxiomCore, the version bumped, and the corrected copy re-issued into `scope/`. An implementing agent must never be able to move the target it is measured against.
 - **`F###` documents arrive on their own.** AxiomCore writes them into `scope/`, and re-writes the file when it re-issues a corrected version. Nothing here fetches, and nothing here is copied by hand. A document appearing without warning is normal; a document changing under you means AxiomCore revised it, and the version in the frontmatter says which one you now hold.

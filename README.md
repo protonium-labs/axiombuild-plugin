@@ -35,7 +35,7 @@ Skills are namespaced by the plugin, so `/scope` is invoked as `/axiombuild:scop
         /scope quick ──►  scope/  ──►  /scope start <ID>
                                               │          (record it, cut feature/<ID>)
                                               ▼
-                            superpowers:writing-plans          the tasks
+                            superpowers:writing-plans          the tasks (reads docs/mockups/)
                                               ▼
                             superpowers:executing-plans        TDD, commit per step
                                               ▼
@@ -56,6 +56,10 @@ Entry is at `writing-plans`, **not** `brainstorming` — the product thinking al
 AxiomCore, and repeating it is the ceremony 2.0.0 exists to remove.
 
 One changelog line per feature. The feature ID links it to the commits.
+
+A UI feature arrives with its screen mockups in `docs/mockups/` (2.1.0): self-contained HTML, read-only,
+named in the document's `mockups:` frontmatter. `/scope start` refuses to open a feature whose
+mockup is missing. The owner, not a tool, checks the running screen against it.
 
 ## Why 2.0.0 dropped implementation
 

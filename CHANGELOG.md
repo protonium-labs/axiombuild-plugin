@@ -2,6 +2,19 @@
 
 All notable changes to the AxiomBuild plugin. Newest on top.
 
+## 2.1.0 — 2026-09-12
+
+A UI feature arrives with the screens it touches already drawn. Measured on the same project: five of the seven revisions its design system went through after V001 came up while a view was being built or looked at — layout was settled by seeing the running app, one revision at a time. AxiomCore now draws each screen as an HTML mockup, has the owner approve it, and issues it with the feature document (AxiomCore `su-014`).
+
+- **`docs/mockups/`** holds one self-contained HTML file per screen, written by AxiomCore, read-only here. The feature document names its files in `mockups:` frontmatter.
+- **`/scope start` checks the mockups.** Every file in `mockups:` must be in `docs/mockups/`; a missing one is named and no branch is cut. An absent or empty `mockups:` passes, so every existing document keeps working.
+- **`context/current-feature.md` gains `mockups`**, and the start report hands `writing-plans` the mockup paths beside the document path.
+- **Library documentation via context7**, not memory — stated in the skill's loop description.
+- **No compare step and no gate on `/scope done`.** The owner checks the running screen against the mockup. AxiomBuild stays bookkeeping.
+- **Fixed:** the `scope/README.md` template still said feature documents are copied in by hand. They have arrived automatically since 1.2.0.
+
+**Upgrading.** Nothing to do. Documents without `mockups:` behave exactly as on 2.0.0.
+
 ## 2.0.0 — 2026-09-09
 
 **Breaking.** AxiomBuild stops implementing. It keeps the books, and `superpowers` does the building.

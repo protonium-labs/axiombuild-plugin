@@ -21,6 +21,7 @@ origin: axiomcore          # axiomcore | local  (absent in a document => axiomco
 type: new                  # new | change | quick
 version: V003              # the feature document's own version; no other document's version is pinned
 source: scope/sp-01-f012-favorites.md
+mockups: [docs/mockups/sp-01-006-mockup-favorites.html]   # from the document's frontmatter; [] when it has no UI
 branch: feature/SP-F012
 status: open               # idle | open | blocked
 started: 2026-09-09
@@ -29,6 +30,7 @@ started: 2026-09-09
 # Current Feature — SP-F012 Favorites page
 
 Requirements: `scope/sp-01-f012-favorites.md` (read-only).
+Mockups: `docs/mockups/sp-01-006-mockup-favorites.html` (read-only).
 Task plan: `docs/superpowers/plans/2026-09-09-favorites-page.md`.
 
 ## Blocked
