@@ -1,7 +1,7 @@
 {
   "name": "axiombuild",
-  "description": "Bookkeeping for spec-driven coding projects. Owns the inbox of feature documents waiting to be built, records which one is open, and archives each with a changelog line when it lands. It does not plan, implement or verify - superpowers does that, with the repository readable. Pairs with AxiomCore, which writes the feature documents. Run /scope init in a new project folder to begin.",
-  "version": "2.1.0",
+  "description": "Bookkeeping for spec-driven coding projects. Owns the inbox of feature documents waiting to be built, records which one is open, and archives each with a changelog entry and a release tag when it lands. It does not plan, implement or verify - superpowers does that, with the repository readable. Pairs with AxiomCore, which writes the feature documents. Run /scope init in a new project folder to begin.",
+  "version": "2.2.0",
   "author": {
     "name": "Alexander Dybov",
     "email": "dybovalex@gmail.com"

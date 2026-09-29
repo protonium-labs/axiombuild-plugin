@@ -4,6 +4,7 @@ title: <short title, 3-6 words>
 type: quick
 origin: local
 created: YYYY-MM-DD
+release_note:        # one sentence in the customer's words: what now works; empty when a customer sees nothing of it; line deleted with release tagging off
 ---
 
 # `<ACR>-Q###` — `<short title>`

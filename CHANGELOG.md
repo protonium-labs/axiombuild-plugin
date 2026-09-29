@@ -2,6 +2,21 @@
 
 All notable changes to the AxiomBuild plugin. Newest on top.
 
+## 2.2.0 — 2026-09-29
+
+Every finished feature and every fix becomes a numbered release, marked by a git tag. The number is not counted here: AxiomCore writes it into the feature document, and this plugin transcribes it (AxiomCore `su-015`).
+
+- **`v<major>.<minor>.<patch>`.** The second digit is the feature number — `F005` is `v0.5.0` — so features may finish in any order and no second counter exists. The first digit is the project's own and arrives with the second in `release:`. The third counts fixes.
+- **`/scope done` sets the release.** It writes the number to `VERSION`, prepends the changelog entry, commits, and sets an annotated tag on that commit. For a quick document it takes the highest existing tag and raises the third digit.
+- **`VERSION` file.** One line at the repository root. A build triggered by a merge runs before the tag exists, and most build servers fetch no tags; the file is there so the application can show its number without either.
+- **Changelog format v2.** The line gains the release, and below it an optional `Customer:` line, transcribed from `release_note:` in the document. Nothing is composed at `done`.
+- **`/scope start` checks the release.** An `F###` document without `release:`, or with one whose tag already exists, is not started.
+- **`/scope quick`** drafts `release_note:` with the document, approved with it.
+- **`scope/registry.md` gains `Release tagging` and `Push releases`**, both `off` unless set. `/scope init` asks for them and adds them to an existing registry without touching anything else.
+- **The tag labels, it triggers nothing.** Deployment stays where the project put it.
+
+**Upgrading.** Nothing to do. A repository without `Release tagging: on` behaves exactly as on 2.1.0. To switch it on, run `/scope init` again or add the two lines to `scope/registry.md`, and set `Format: **v2**` in `CHANGELOG.md`; older v1 lines below stay as they are.
+
 ## 2.1.0 — 2026-09-12
 
 A UI feature arrives with the screens it touches already drawn. Measured on the same project: five of the seven revisions its design system went through after V001 came up while a view was being built or looked at — layout was settled by seeing the running app, one revision at a time. AxiomCore now draws each screen as an HTML mockup, has the owner approve it, and issues it with the feature document (AxiomCore `su-014`).

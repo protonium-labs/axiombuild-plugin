@@ -20,4 +20,5 @@ code, the agent stops and asks rather than guessing.
 
 `scope/` → `/scope start` → `superpowers` (plan → build → verify → merge) → `/scope done` → `scope/done/`
 
-Completed documents move to `scope/done/` and are linked from `CHANGELOG.md`.
+Completed documents move to `scope/done/` and are linked from `CHANGELOG.md`. Where release tagging is
+on, each one is a release: a version number in `VERSION`, a git tag, and a changelog entry.

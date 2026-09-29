@@ -20,6 +20,7 @@ title: Favorites page
 origin: axiomcore          # axiomcore | local  (absent in a document => axiomcore)
 type: new                  # new | change | quick
 version: V003              # the feature document's own version; no other document's version is pinned
+release: v0.12.0           # from the document's frontmatter; empty for a quick document and with release tagging off
 source: scope/sp-01-f012-favorites.md
 mockups: [docs/mockups/sp-01-006-mockup-favorites.html]   # from the document's frontmatter; [] when it has no UI
 branch: feature/SP-F012
