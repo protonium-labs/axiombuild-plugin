@@ -5,6 +5,7 @@ Acronym: **`<ACR>`**
 Next quick feature: **Q001**
 Release tagging: **off**
 Push releases: **off**
+Release major: **0**
 
 <!--
 Owned by /scope. The acronym is fixed for the project's life and must not collide with an
@@ -18,4 +19,9 @@ Release tagging (on | off, off when the line is absent): with on, /scope done gi
 feature and fix a version number, writes it to VERSION and sets a git tag. Push releases (on | off):
 with on, /scope done pushes the bookkeeping commit and the tag itself; with off it reports the
 command. Both are set by /scope init and changed by the owner only.
+
+Release major: the first digit of every release, changed by the owner only — its meaning is the
+project's own. /scope done counts the other two from the highest existing tag: a feature raises the
+second digit, a fix the third. Raising Release major makes the next release v<major>.0.0. Absent,
+the first digit of the highest tag is kept. The line is written only with release tagging on.
 -->

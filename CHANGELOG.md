@@ -2,6 +2,18 @@
 
 All notable changes to the AxiomBuild plugin. Newest on top.
 
+## 2.3.0 — 2026-10-13
+
+The release number is counted here, at `/scope done`, and no longer arrives in the feature document (AxiomCore `su-017`). Under 2.2.0 the second digit was the feature number, fixed when the document was written. When a feature finished after higher-numbered ones, its release went backwards: a project tagged `v0.9.0` after `v0.12.1`, and its `VERSION` read `v0.12.1`, `v0.9.0`, `v0.12.2` in one day.
+
+- **Counted from the highest tag.** A feature raises the second digit and sets the third to 0; a fix raises the third, as before. Version order and date order are now the same.
+- **`Release major` in `scope/registry.md`** is the first digit, changed by the owner only. Raising it makes the next release `v<major>.0.0`; a lower value than the highest tag stops `done` with a question. Absent, the first digit of the highest tag is kept.
+- **`/scope start` no longer checks `release:`**, and `context/current-feature.md` no longer records a release.
+- **`release:` in a document is ignored.** Documents issued before 2.3.0 carry one; it is not read.
+- **Existing tags stay.** A tag is never moved or deleted; the count continues from the highest one.
+
+**Upgrading.** Nothing breaks without action: with `Release major` absent, the first digit of the highest tag is kept. Add `Release major: **<that digit>**` to `scope/registry.md`, or run `/scope init` again, to have the line in place for the day the owner raises it. Update the comment in `CHANGELOG.md` by hand if you want it to state the new count.
+
 ## 2.2.0 — 2026-09-29
 
 Every finished feature and every fix becomes a numbered release, marked by a git tag. The number is not counted here: AxiomCore writes it into the feature document, and this plugin transcribes it (AxiomCore `su-015`).

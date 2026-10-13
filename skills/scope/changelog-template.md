@@ -16,9 +16,9 @@ Entry format (v2, release tagging on):
 The `Customer:` line is there only when the document carries a release_note. A public changelog
 page reads the entries that have one and ignores the rest.
 
-The release is `v<major>.<minor>.<patch>`. F###: transcribed from the document's `release:`, the
-second digit being the feature number, so entries need not be in number order. Q###: the highest
-existing tag with the third digit raised by one.
+The release is `v<major>.<minor>.<patch>`, counted by /scope done from the highest existing tag:
+a feature raises the second digit (third back to 0), a fix the third. The first digit is
+`Release major` in scope/registry.md. Entries are therefore in date order and version order alike.
 
 Format v1 (release tagging off) is the same line without the release and without a customer line:
 - **DATE** · `ID` · Title · [`filename`](scope/done/filename)

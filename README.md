@@ -59,8 +59,9 @@ One changelog line per feature. The feature ID links it to the commits.
 
 Every finished feature and fix can be a release (2.2.0): with `Release tagging: on` in
 `scope/registry.md`, `/scope done` writes the version to `VERSION`, records it in the changelog with
-an optional customer line, and sets a git tag. The number of a feature arrives from AxiomCore in
-`release:`; a fix raises the third digit of the highest tag.
+an optional customer line, and sets a git tag. The number is counted at `done` (2.3.0): a feature
+raises the second digit of the highest tag, a fix the third, and the first is `Release major` in
+`scope/registry.md`, set by the owner.
 
 A UI feature arrives with its screen mockups in `docs/mockups/` (2.1.0): self-contained HTML, read-only,
 named in the document's `mockups:` frontmatter. `/scope start` refuses to open a feature whose
